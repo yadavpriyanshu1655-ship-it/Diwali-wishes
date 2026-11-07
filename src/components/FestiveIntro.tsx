@@ -1,5 +1,6 @@
 import React from 'react';
 import { RangoliDivider, SmallPetalIcon } from './illustrations/RangoliMotif';
+import { RangoliReveal } from './rangoli/RangoliReveal';
 import { Sun, Heart, Sparkle } from 'lucide-react';
 
 export const FestiveIntro: React.FC = () => {
@@ -65,6 +66,25 @@ export const FestiveIntro: React.FC = () => {
               <span>॥ आनन्दो भवतु ॥</span>
             </div>
           </div>
+        </div>
+
+        {/* Traditional Floral Rangoli Reveal Showcase */}
+        <div className="my-16 py-10 px-4 sm:px-8 rounded-2xl bg-surface/50 border border-secondary/20 flex flex-col items-center justify-center text-center shadow-soft">
+          <div className="max-w-md mx-auto mb-6">
+            <div className="flex items-center justify-center gap-2 text-[11px] uppercase tracking-widest text-secondary font-semibold font-sans mb-1">
+              <span>•</span>
+              <span>Auspicious Kolam Art</span>
+              <span>•</span>
+            </div>
+            <h3 className="font-serif-indian text-2xl sm:text-3xl font-bold text-text">
+              पारंपरिक पुष्प रंगोली
+            </h3>
+            <p className="font-sans text-xs sm:text-sm text-text/75 mt-1.5 leading-relaxed">
+              Drawn with natural mineral pigments of turmeric ochre, river terracotta, and white rice flour to welcome prosperity into every home.
+            </p>
+          </div>
+
+          <RangoliReveal />
         </div>
 
         {/* 3 Balanced Editorial Pillars (Avoiding excessive cards) */}

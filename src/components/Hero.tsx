@@ -1,75 +1,125 @@
-import React from 'react';
-import { ClayDiyaIllustration } from './illustrations/ClayDiyaIllustration';
+import React, { useState } from 'react';
+import { InteractiveDiya } from './diya/InteractiveDiya';
 import { FloralToran } from './illustrations/FloralToran';
 import { RangoliDivider } from './illustrations/RangoliMotif';
-import { Sparkles, ArrowDown } from 'lucide-react';
+import { Sparkles, ArrowDown, Flame } from 'lucide-react';
 
-export const Hero: React.FC = () => {
+interface HeroProps {
+  onEnterCelebration?: () => void;
+}
+
+export const Hero: React.FC<HeroProps> = ({ onEnterCelebration }) => {
+  const [isClicked, setIsClicked] = useState(false);
+
   const handleEnterCelebration = () => {
+    setIsClicked(true);
+
+    if (onEnterCelebration) {
+      onEnterCelebration();
+    }
+
+    window.dispatchEvent(
+      new CustomEvent('shubh-deep:enter-celebration', {
+        detail: { timestamp: Date.now() },
+      })
+    );
+
     const target = document.querySelector('#festive-intro');
     if (target) {
       target.scrollIntoView({ behavior: 'smooth' });
     }
+
+    setTimeout(() => {
+      setIsClicked(false);
+    }, 400);
   };
 
   return (
-    <section id="hero" className="relative pt-2 pb-16 sm:pb-24 overflow-hidden">
+    <section
+      id="hero"
+      className="relative min-h-[calc(100dvh-4.5rem)] sm:min-h-[calc(100dvh-5rem)] flex flex-col justify-between items-center pt-2 pb-10 sm:pb-14 px-4 sm:px-6 lg:px-8 overflow-hidden select-none"
+      aria-label="Welcome to Shubh Deep"
+    >
       {/* Decorative Traditional Toran at Viewport Top */}
-      <FloralToran className="mb-4 sm:mb-6" />
+      <div className="w-full">
+        <FloralToran className="mb-2 sm:mb-4" />
+      </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      {/* Main Full-Screen Welcome Content */}
+      <div className="max-w-4xl w-full mx-auto text-center flex flex-col items-center my-auto py-4">
         
-        {/* Auspicious Vedic Invocation Tag */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface border border-secondary/25 shadow-soft mb-6 sm:mb-8 animate-fade-in">
-          <Sparkles className="w-3.5 h-3.5 text-accent" />
-          <span className="font-serif-indian text-xs sm:text-sm tracking-wide text-secondary font-medium">
-            ॥ तमसो मा ज्योतिर्गमय ॥
-          </span>
-          <span className="w-1 h-1 rounded-full bg-secondary/40" />
-          <span className="text-[11px] font-sans tracking-widest text-text/70 uppercase">
-            Festival of Deep
-          </span>
+        {/* Step 1: Branding & Decorative Label (A FESTIVAL OF LIGHT) */}
+        <div className="hero-anim-brand inline-flex flex-col sm:flex-row items-center gap-2 px-4 py-1.5 rounded-full bg-surface/90 border border-secondary/25 shadow-soft mb-5 sm:mb-6">
+          <div className="flex items-center gap-1.5 text-primary">
+            <Flame className="w-3.5 h-3.5 fill-primary/20" />
+            <span className="font-serif-indian text-xs sm:text-sm font-semibold tracking-wider">
+              SHUBH DEEP
+            </span>
+          </div>
+          <span className="hidden sm:inline w-1 h-1 rounded-full bg-secondary/40" />
+          <div className="flex items-center gap-1 text-[10.5px] sm:text-[11px] font-sans tracking-[0.22em] text-secondary font-semibold uppercase">
+            <Sparkles className="w-3 h-3 text-accent" />
+            <span>A FESTIVAL OF LIGHT</span>
+          </div>
         </div>
 
-        {/* Main Heading */}
-        <h1 className="font-serif-indian text-4xl sm:text-6xl md:text-7xl font-bold text-primary tracking-tight leading-tight sm:leading-none mb-3">
+        {/* Step 2: Main Hindi Heading */}
+        <h1 className="hero-anim-heading font-serif-indian text-5xl sm:text-7xl md:text-8xl font-bold text-primary tracking-tight leading-tight sm:leading-none mb-3 drop-shadow-sm">
           शुभ दीपावली
         </h1>
 
-        {/* Subtitle */}
-        <p className="font-serif-indian text-xl sm:text-2xl md:text-3xl text-text font-normal mb-4 tracking-wide">
+        {/* Step 3: Subtitle */}
+        <p className="hero-anim-subtitle font-serif-indian text-xl sm:text-3xl md:text-4xl text-text font-normal mb-3 tracking-wide">
           A Little Light, A Lot of Happiness.
         </p>
 
-        {/* Delicate Sacred Divider */}
-        <RangoliDivider className="my-5" />
-
-        {/* Short Emotional Introductory Text */}
-        <p className="max-w-2xl mx-auto font-sans text-sm sm:text-base md:text-lg text-text/80 leading-relaxed font-normal mb-8 sm:mb-10 px-2">
-          In every humble earthen flame rests an eternal promise—that even the gentlest diya can dispel the deepest shadow. 
-          May this season of light bring stillness to your thoughts, peace to your home, and abundant grace to every step of your journey.
-        </p>
-
-        {/* Clay Diya Centerpiece Illustration */}
-        <div className="my-6 sm:my-10 flex flex-col items-center justify-center">
-          <ClayDiyaIllustration />
-          <p className="text-xs font-sans tracking-widest uppercase text-secondary/70 mt-4 flex items-center gap-1.5">
-            <span>•</span> Mitti ka Deepam <span>•</span>
-          </p>
+        {/* Step 5: Delicate Sacred Divider with Floral/Petal Motifs */}
+        <div className="hero-anim-petals w-full max-w-xs mx-auto my-3 sm:my-4">
+          <RangoliDivider />
         </div>
 
-        {/* Prominent Enter Celebration Button */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6">
+        {/* Step 3: Heartwarming Introductory Message */}
+        <p className="hero-anim-subtitle max-w-xl mx-auto font-sans text-sm sm:text-base md:text-lg text-text/85 italic leading-relaxed mb-6 sm:mb-8 px-2 font-normal">
+          "May this beautiful festival bring peace, happiness, and countless little reasons to smile."
+        </p>
+
+        {/* Step 4: Interactive Sacred Diya Centerpiece */}
+        <div className="hero-anim-diya my-2 sm:my-4 w-full flex flex-col items-center justify-center">
+          <InteractiveDiya />
+        </div>
+
+        {/* Step 6: Prominent Enter Celebration Button */}
+        <div className="hero-anim-button mt-8 sm:mt-10 flex flex-col items-center gap-3">
           <button
             type="button"
             onClick={handleEnterCelebration}
-            className="group relative inline-flex items-center justify-center gap-3 px-8 py-3.5 rounded-lg bg-primary text-surface font-sans font-medium text-sm sm:text-base tracking-wide shadow-earthy hover:bg-[#A35232] active:scale-[0.99] transition-all border border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
+            className={`group relative inline-flex items-center justify-center gap-3 px-8 py-3.5 sm:px-10 sm:py-4 rounded-xl bg-surface/90 text-text font-sans font-medium text-sm sm:text-base tracking-wide border border-secondary/30 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background transition-all duration-300 min-h-[48px] touch-manipulation cursor-pointer shadow-soft ${
+              isClicked
+                ? 'scale-[0.97] bg-[#FAF6EE] shadow-inner ring-2 ring-primary/40'
+                : 'hover:-translate-y-0.5 hover:bg-surface hover:border-primary/40 hover:text-primary active:scale-[0.97]'
+            }`}
+            aria-label="Enter Celebration — Explore Shubh Deep"
           >
-            <span>Enter Celebration</span>
-            <ArrowDown className="w-4 h-4 text-accent group-hover:translate-y-0.5 transition-transform" />
+            <span className="font-medium tracking-wide">Enter Celebration</span>
+            <ArrowDown
+              className={`w-4 h-4 text-accent transition-transform duration-300 ${
+                isClicked ? 'translate-y-1' : 'group-hover:translate-y-1'
+              }`}
+            />
           </button>
+
+          <span className="text-[11px] font-sans text-secondary/70 tracking-wider uppercase">
+            Scroll to explore reflections & traditions
+          </span>
         </div>
 
+      </div>
+
+      {/* Subtle Bottom Grounding Motif */}
+      <div className="w-full flex justify-center items-center py-2 opacity-60">
+        <div className="h-[1px] w-16 bg-gradient-to-r from-transparent to-secondary/30" />
+        <span className="mx-2 text-xs font-serif-indian text-secondary">॥ शुभ दीप ॥</span>
+        <div className="h-[1px] w-16 bg-gradient-to-l from-transparent to-secondary/30" />
       </div>
     </section>
   );

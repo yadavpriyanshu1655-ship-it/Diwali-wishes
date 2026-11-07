@@ -44,3 +44,503 @@
 html {
   scroll-behavior: smooth;
 }
+
+/* =========================================================================
+   PHASE 02: WELCOME EXPERIENCE ENTRANCE ANIMATIONS (Natural, Slow, Elegant)
+   ========================================================================= */
+
+@keyframes pageFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes heroFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes diyaGentleReveal {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes petalsFloatIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) rotate(-4deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes diyaFloatBreathing {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes flameAuraBreathe {
+  0%, 100% {
+    opacity: 0.38;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.58;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes buttonPulseGlow {
+  0%, 100% {
+    box-shadow: 0 6px 20px -3px rgba(185, 101, 67, 0.22), 0 2px 8px -2px rgba(73, 56, 46, 0.08);
+  }
+  50% {
+    box-shadow: 0 10px 28px -2px rgba(185, 101, 67, 0.38), 0 4px 12px -2px rgba(213, 167, 91, 0.25);
+  }
+}
+
+/* Step 1: Branding & Decorative Label */
+.hero-anim-brand {
+  animation: heroFadeUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.2s backwards;
+}
+
+/* Step 2: Main Hindi Heading */
+.hero-anim-heading {
+  animation: heroFadeUp 1.0s cubic-bezier(0.16, 1, 0.3, 1) 0.45s backwards;
+}
+
+/* Step 3: Subtitle & Message */
+.hero-anim-subtitle {
+  animation: heroFadeUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.7s backwards;
+}
+
+/* Step 4: Diya Visual gentle fade-in */
+.hero-anim-diya {
+  animation: diyaGentleReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.95s backwards;
+}
+
+/* Step 5: Decorative Petals & Motifs */
+.hero-anim-petals {
+  animation: petalsFloatIn 1.0s cubic-bezier(0.16, 1, 0.3, 1) 1.15s backwards;
+}
+
+/* Step 6: Enter Celebration Button */
+.hero-anim-button {
+  animation: heroFadeUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) 1.35s backwards;
+}
+
+/* Diya subtle breathing float & flame glow */
+.diya-floating {
+  animation: diyaFloatBreathing 6s ease-in-out infinite 2.2s;
+}
+
+.flame-breathing {
+  animation: flameAuraBreathe 4.5s ease-in-out infinite alternate 1.5s;
+}
+
+.button-glow-idle {
+  animation: buttonPulseGlow 3.5s ease-in-out infinite alternate 2.5s;
+}
+
+.page-fade-in {
+  animation: pageFadeIn 0.8s ease-out;
+}
+
+/* =========================================================================
+   PHASE 03: INTERACTIVE DIYA LIGHTING & FLAME KEYFRAME ANIMATIONS
+   ========================================================================= */
+
+@keyframes flameIgnite {
+  0% {
+    transform: scale(0.08) translateY(18px);
+    opacity: 0;
+  }
+  30% {
+    transform: scale(0.6) translateY(6px);
+    opacity: 0.7;
+  }
+  65% {
+    transform: scale(1.15) translateY(-3px);
+    opacity: 0.95;
+  }
+  85% {
+    transform: scale(0.96) translateY(1px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes flameNaturalFlicker {
+  0% {
+    transform: scale(1) rotate(0deg) skewX(0deg);
+  }
+  15% {
+    transform: scale(1.02, 0.98) rotate(-0.8deg) skewX(-1.2deg);
+  }
+  30% {
+    transform: scale(0.98, 1.03) rotate(0.6deg) skewX(0.8deg);
+  }
+  50% {
+    transform: scale(1.03, 0.97) rotate(-0.5deg) skewX(-0.9deg);
+  }
+  70% {
+    transform: scale(0.99, 1.02) rotate(0.7deg) skewX(1deg);
+  }
+  85% {
+    transform: scale(1.01, 0.99) rotate(-0.4deg) skewX(-0.6deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg) skewX(0deg);
+  }
+}
+
+@keyframes flameCoreFlicker {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.92;
+  }
+  35% {
+    transform: scale(1.04, 0.96);
+    opacity: 0.98;
+  }
+  70% {
+    transform: scale(0.96, 1.03);
+    opacity: 0.90;
+  }
+}
+
+@keyframes lightRaysRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes surroundingIllumination {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes wickEmberPulse {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.65;
+    transform: scale(1.2);
+  }
+}
+
+.flame-igniting {
+  transform-origin: 50% 95%;
+  animation: flameIgnite 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.flame-active {
+  transform-origin: 50% 95%;
+  animation: flameNaturalFlicker 3.2s ease-in-out infinite;
+}
+
+.flame-core-active {
+  transform-origin: 50% 95%;
+  animation: flameCoreFlicker 2.1s ease-in-out infinite;
+}
+
+.rays-rotating {
+  transform-origin: 130px 105px;
+  animation: lightRaysRotate 45s linear infinite;
+}
+
+.surrounding-glow-reveal {
+  animation: surroundingIllumination 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.wick-ember {
+  animation: wickEmberPulse 3.5s ease-in-out infinite alternate;
+}
+
+/* =========================================================================
+   PHASE 04: TRADITIONAL FLORAL RANGOLI REVEAL KEYFRAMES
+   ========================================================================= */
+
+@keyframes rangoliStrokeDraw {
+  from {
+    stroke-dashoffset: 500;
+    opacity: 0.2;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes rangoliPetalBlossom {
+  0% {
+    transform: scale(0.7) rotate(-10deg);
+    opacity: 0;
+  }
+  65% {
+    transform: scale(1.03) rotate(1.5deg);
+    opacity: 0.95;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.rangoli-drawing-ring1 {
+  stroke-dasharray: 500;
+  animation: rangoliStrokeDraw 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+}
+
+.rangoli-drawing-ring2 {
+  stroke-dasharray: 500;
+  animation: rangoliStrokeDraw 1.8s cubic-bezier(0.22, 1, 0.36, 1) 0.35s forwards;
+}
+
+.rangoli-blossoming {
+  transform-origin: 150px 150px;
+  animation: rangoliPetalBlossom 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+}
+
+/* =========================================================================
+   PHASE 05: SHAYARI & WISHES INTERACTIVE REVEAL KEYFRAMES
+   ========================================================================= */
+
+@keyframes wishCardSwap {
+  0% {
+    opacity: 0;
+    transform: scale(0.97) translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes wishLineFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes copyToastPop {
+  0% {
+    transform: scale(0.85) translateY(4px);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.04) translateY(-1px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.wish-card-enter {
+  animation: wishCardSwap 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.wish-line-1 {
+  animation: wishLineFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.08s backwards;
+}
+
+.wish-line-2 {
+  animation: wishLineFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.18s backwards;
+}
+
+.wish-line-3 {
+  animation: wishLineFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.28s backwards;
+}
+
+.wish-line-4 {
+  animation: wishLineFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.38s backwards;
+}
+
+.copy-toast-pop {
+  animation: copyToastPop 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* =========================================================================
+   PHASE 06: GIFT BOX 3D OPENING, INNER LIGHT & SPECIAL MESSAGE KEYFRAMES
+   ========================================================================= */
+
+@keyframes giftBoxFloatUp {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes ribbonLoosen {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  40% {
+    transform: scale(1.08) rotate(3deg);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(1.25) translateY(-20px);
+    opacity: 0;
+  }
+}
+
+@keyframes lid3DOpen {
+  0% {
+    transform: rotateX(0deg) translateY(0);
+  }
+  35% {
+    transform: rotateX(-35deg) translateY(-8px);
+  }
+  100% {
+    transform: rotateX(-115deg) translateY(-32px);
+  }
+}
+
+@keyframes innerLightBloom {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateY(12px);
+  }
+  60% {
+    opacity: 0.9;
+    transform: scale(1.15) translateY(-6px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes giftEmberFloat {
+  0% {
+    transform: translateY(10px) scale(0.6);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translateY(-65px) scale(1.2);
+    opacity: 0;
+  }
+}
+
+/* Staggered special poem line reveals (Lines 1 to 7) */
+.special-line-1 { animation: wishLineFadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.15s backwards; }
+.special-line-2 { animation: wishLineFadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.35s backwards; }
+.special-line-3 { animation: wishLineFadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.65s backwards; }
+.special-line-4 { animation: wishLineFadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.85s backwards; }
+.special-line-5 { animation: wishLineFadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 1.25s backwards; }
+.special-line-6 { animation: wishLineFadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 1.55s backwards; }
+.special-line-7 { animation: wishLineFadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 1.85s backwards; }
+.special-final-greeting { animation: wishLineFadeUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) 2.25s backwards; }
+.final-screen-enter { animation: wishCardSwap 0.8s cubic-bezier(0.16, 1, 0.3, 1) 2.65s backwards; }
+
+.gift-box-up {
+  animation: giftBoxFloatUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.ribbon-untie {
+  animation: ribbonLoosen 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.lid-open {
+  transform-origin: top center;
+  animation: lid3DOpen 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.25s forwards;
+}
+
+.light-emerge {
+  animation: innerLightBloom 1.1s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
+}
+
+.gift-ember-1 { animation: giftEmberFloat 1.8s ease-out 0.5s infinite; }
+.gift-ember-2 { animation: giftEmberFloat 2.1s ease-out 0.8s infinite; }
+.gift-ember-3 { animation: giftEmberFloat 1.9s ease-out 1.1s infinite; }
+
+/* Strict Accessibility: Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.001s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001s !important;
+    scroll-behavior: auto !important;
+  }
+  .diya-floating,
+  .flame-breathing,
+  .button-glow-idle,
+  .flame-igniting,
+  .flame-active,
+  .flame-core-active,
+  .rays-rotating,
+  .surrounding-glow-reveal,
+  .wick-ember,
+  .rangoli-drawing-ring1,
+  .rangoli-drawing-ring2,
+  .rangoli-blossoming,
+  .wish-card-enter,
+  .wish-line-1,
+  .wish-line-2,
+  .wish-line-3,
+  .wish-line-4,
+  .copy-toast-pop,
+  .gift-box-up,
+  .ribbon-untie,
+  .lid-open,
+  .light-emerge,
+  .gift-ember-1,
+  .gift-ember-2,
+  .gift-ember-3,
+  .special-line-1,
+  .special-line-2,
+  .special-line-3,
+  .special-line-4,
+  .special-line-5,
+  .special-line-6,
+  .special-line-7,
+  .special-final-greeting,
+  .final-screen-enter {
+    animation: none !important;
+  }
+}

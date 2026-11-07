@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Menu, X, Flame } from 'lucide-react';
+import { AudioToggle } from './common/AudioToggle';
 
 export const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -7,7 +8,8 @@ export const Navbar: React.FC = () => {
   const navLinks = [
     { label: 'मुख्य पृष्ठ', en: 'Home', href: '#hero' },
     { label: 'दीपावली विचार', en: 'Reflections', href: '#festive-intro' },
-    { label: 'उत्सव दर्शन', en: 'The Celebration', href: '#celebration-spirit' },
+    { label: 'शुभकामनाएं', en: 'Wishes', href: '#festive-wishes' },
+    { label: 'उपहार', en: 'Surprise', href: '#final-surprise' },
   ];
 
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -20,7 +22,7 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-[#F3EBDD]/90 backdrop-blur-md border-b border-[#78805B]/15 transition-all">
+    <header className="sticky top-0 z-50 bg-[#F3EBDD]/92 backdrop-blur-md border-b border-[#78805B]/15 transition-all">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
           
@@ -45,7 +47,7 @@ export const Navbar: React.FC = () => {
           </a>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8" aria-label="Main Navigation">
+          <nav className="hidden md:flex items-center gap-7" aria-label="Main Navigation">
             {navLinks.map((link) => (
               <a
                 key={link.href}
@@ -63,8 +65,13 @@ export const Navbar: React.FC = () => {
               </a>
             ))}
 
+            {/* Audio Toggle in Navbar */}
+            <div className="pl-2 border-l border-secondary/20 flex items-center">
+              <AudioToggle />
+            </div>
+
             {/* Subtle Year / Festive Indicator */}
-            <div className="pl-4 border-l border-secondary/20 flex items-center gap-1.5 text-xs text-secondary font-serif-indian">
+            <div className="flex items-center gap-1.5 text-xs text-secondary font-serif-indian">
               <span>ॐ</span>
               <span className="text-[11px] tracking-widest font-sans font-medium uppercase text-text/60">
                 Deepavali
@@ -72,12 +79,13 @@ export const Navbar: React.FC = () => {
             </div>
           </nav>
 
-          {/* Mobile Menu Button */}
-          <div className="flex md:hidden items-center">
+          {/* Mobile Right Controls: Audio + Menu Button */}
+          <div className="flex md:hidden items-center gap-2">
+            <AudioToggle />
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-md text-text hover:text-primary hover:bg-surface border border-secondary/20 focus:outline-none focus:ring-1 focus:ring-primary"
+              className="p-2 rounded-md text-text hover:text-primary hover:bg-surface border border-secondary/20 focus:outline-none focus:ring-1 focus:ring-primary touch-manipulation"
               aria-expanded={isMobileMenuOpen}
               aria-label="Toggle navigation menu"
             >
