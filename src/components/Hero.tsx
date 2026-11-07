@@ -3,6 +3,7 @@ import { InteractiveDiya } from './diya/InteractiveDiya';
 import { FloralToran } from './illustrations/FloralToran';
 import { RangoliDivider } from './illustrations/RangoliMotif';
 import { Sparkles, ArrowDown, Flame } from 'lucide-react';
+import { useSiteContent } from '../context/ContentContext';
 
 interface HeroProps {
   onEnterCelebration?: () => void;
@@ -10,6 +11,7 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ onEnterCelebration }) => {
   const [isClicked, setIsClicked] = useState(false);
+  const { getContent } = useSiteContent();
 
   const handleEnterCelebration = () => {
     setIsClicked(true);
@@ -59,18 +61,18 @@ export const Hero: React.FC<HeroProps> = ({ onEnterCelebration }) => {
           <span className="hidden sm:inline w-1 h-1 rounded-full bg-secondary/40" />
           <div className="flex items-center gap-1 text-[10.5px] sm:text-[11px] font-sans tracking-[0.22em] text-secondary font-semibold uppercase">
             <Sparkles className="w-3 h-3 text-accent" />
-            <span>A FESTIVAL OF LIGHT</span>
+            <span>{getContent('hero_badge', 'A FESTIVAL OF LIGHT')}</span>
           </div>
         </div>
 
         {/* Step 2: Main Hindi Heading */}
         <h1 className="hero-anim-heading font-serif-indian text-5xl sm:text-7xl md:text-8xl font-bold text-primary tracking-tight leading-tight sm:leading-none mb-3 drop-shadow-sm">
-          शुभ दीपावली
+          {getContent('hero_heading_hindi', 'शुभ दीपावली')}
         </h1>
 
         {/* Step 3: Subtitle */}
         <p className="hero-anim-subtitle font-serif-indian text-xl sm:text-3xl md:text-4xl text-text font-normal mb-3 tracking-wide">
-          A Little Light, A Lot of Happiness.
+          {getContent('hero_subtitle', 'A Little Light, A Lot of Happiness.')}
         </p>
 
         {/* Step 5: Delicate Sacred Divider with Floral/Petal Motifs */}
@@ -80,7 +82,7 @@ export const Hero: React.FC<HeroProps> = ({ onEnterCelebration }) => {
 
         {/* Step 3: Heartwarming Introductory Message */}
         <p className="hero-anim-subtitle max-w-xl mx-auto font-sans text-sm sm:text-base md:text-lg text-text/85 italic leading-relaxed mb-6 sm:mb-8 px-2 font-normal">
-          "May this beautiful festival bring peace, happiness, and countless little reasons to smile."
+          {getContent('hero_intro_quote', '"May this beautiful festival bring peace, happiness, and countless little reasons to smile."')}
         </p>
 
         {/* Step 4: Interactive Sacred Diya Centerpiece */}
@@ -100,7 +102,9 @@ export const Hero: React.FC<HeroProps> = ({ onEnterCelebration }) => {
             }`}
             aria-label="Enter Celebration — Explore Shubh Deep"
           >
-            <span className="font-medium tracking-wide">Enter Celebration</span>
+            <span className="font-medium tracking-wide">
+              {getContent('hero_enter_btn', 'Enter Celebration')}
+            </span>
             <ArrowDown
               className={`w-4 h-4 text-accent transition-transform duration-300 ${
                 isClicked ? 'translate-y-1' : 'group-hover:translate-y-1'

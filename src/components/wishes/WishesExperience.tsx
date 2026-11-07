@@ -1,11 +1,9 @@
-import React, { useState, useMemo } from 'react';
-import { WISHES_DATA, WishCategory, WishItem } from '../../data/wishesData';
+import React, { useState, useMemo, useEffect } from 'react';
+import { WishItem } from '../../data/wishesData';
 import { RangoliDivider, SmallPetalIcon } from '../illustrations/RangoliMotif';
 import { soundEngine } from '../../services/soundEngine';
+import { useSiteContent } from '../../context/ContentContext';
 import {
-  Smile,
-  Heart,
-  Sparkles,
   ArrowRight,
   Copy,
   Check,
@@ -13,47 +11,75 @@ import {
 } from 'lucide-react';
 
 export const WishesExperience: React.FC = () => {
-  const [activeCategory, setActiveCategory] = useState<WishCategory>('funny');
+  const { wishes, categories, getContent } = useSiteContent();
+
+  const [activeCategory, setActiveCategory] = useState<string>('funny');
   const [copied, setCopied] = useState<boolean>(false);
   const [animKey, setAnimKey] = useState<number>(0);
 
-  // Group wishes by category
+  // Group wishes by category slug
   const categorizedWishes = useMemo(() => {
-    return {
-      funny: WISHES_DATA.filter((w) => w.category === 'funny'),
-      heartwarming: WISHES_DATA.filter((w) => w.category === 'heartwarming'),
-      flirt: WISHES_DATA.filter((w) => w.category === 'flirt'),
-    };
-  }, []);
+    const map: Record<string, WishItem[]> = {};
+
+    categories.forEach((cat) => {
+      map[cat.id] = [];
+    });
+
+    wishes.forEach((w) => {
+      const catKey = w.category || 'funny';
+      if (!map[catKey]) {
+        map[catKey] = [];
+      }
+      map[catKey].push(w);
+    });
+
+    return map;
+  }, [wishes, categories]);
 
   // Track seen indices to strictly prevent immediate repeats
-  const [history, setHistory] = useState<{ [key in WishCategory]: number[] }>({
+  const [history, setHistory] = useState<Record<string, number[]>>({
     funny: [0],
-    heartwarming: [0],
-    flirt: [0],
   });
 
   const [currentIndex, setCurrentIndex] = useState<number>(0);
 
+  // Active list of wishes for current category
+  const activeList = categorizedWishes[activeCategory] || categorizedWishes['funny'] || wishes;
+
   const currentWish: WishItem =
-    categorizedWishes[activeCategory][currentIndex] ||
-    categorizedWishes[activeCategory][0];
+    activeList[currentIndex] ||
+    activeList[0] || {
+      id: 'default',
+      category: 'funny',
+      hindi: 'शुभ दीपावली!\nसुख, शांति और समृद्धि की मंगलकामनाएं।',
+      english: 'Happy Deepavali! Wishing you serenity, health and prosperity.',
+      tag: 'Diwali Blessing',
+      emoji: '🪔',
+    };
+
+  // Keep index within bounds if activeList length changes
+  useEffect(() => {
+    if (currentIndex >= activeList.length) {
+      setCurrentIndex(0);
+    }
+  }, [activeList, currentIndex]);
 
   // Change Category Handler
-  const handleCategoryChange = (category: WishCategory) => {
+  const handleCategoryChange = (category: string) => {
     if (category === activeCategory) return;
     soundEngine.playTempleBell();
     setActiveCategory(category);
 
-    // Pick first or random from that category
-    const list = categorizedWishes[category];
-    const past = history[category];
+    const list = categorizedWishes[category] || [];
+    const past = history[category] || [];
     let nextIdx = 0;
-    if (past.length > 0) {
-      nextIdx = past[past.length - 1] % list.length;
-    } else {
-      nextIdx = Math.floor(Math.random() * list.length);
-      setHistory((prev) => ({ ...prev, [category]: [nextIdx] }));
+    if (list.length > 0) {
+      if (past.length > 0) {
+        nextIdx = past[past.length - 1] % list.length;
+      } else {
+        nextIdx = Math.floor(Math.random() * list.length);
+        setHistory((prev) => ({ ...prev, [category]: [nextIdx] }));
+      }
     }
     setCurrentIndex(nextIdx);
     setAnimKey((prev) => prev + 1);
@@ -62,8 +88,13 @@ export const WishesExperience: React.FC = () => {
   // Next Wish Handler (Non-repeating random picker)
   const handleNextWish = () => {
     soundEngine.playTempleBell();
-    const list = categorizedWishes[activeCategory];
-    const past = history[activeCategory];
+    const list = activeList;
+    if (list.length <= 1) {
+      setAnimKey((prev) => prev + 1);
+      return;
+    }
+
+    const past = history[activeCategory] || [];
 
     // Filter out indices already seen
     const availableIndices = list
@@ -77,7 +108,7 @@ export const WishesExperience: React.FC = () => {
         availableIndices[Math.floor(Math.random() * availableIndices.length)];
       setHistory((prev) => ({
         ...prev,
-        [activeCategory]: [...prev[activeCategory], nextIdx],
+        [activeCategory]: [...(prev[activeCategory] || []), nextIdx],
       }));
     } else {
       // All have been seen; reset history and pick any different from current
@@ -102,20 +133,22 @@ export const WishesExperience: React.FC = () => {
     setAnimKey((prev) => prev + 1);
   };
 
-  // Copy to Clipboard with fallback support
+  // Copy to Clipboard Handler
   const handleCopyWish = async () => {
-    const textToCopy = `✨ *शुभ दीपावली | Shubh Deep* ✨\n\n${currentWish.hindi}${
-      currentWish.english ? `\n\n"${currentWish.english}"` : ''
-    }\n\n— Wishing you light and joy! 🪔`;
+    soundEngine.playTempleBell();
+    const formattedWish = `${currentWish.hindi}\n\n${
+      currentWish.english ? currentWish.english + '\n\n' : ''
+    }✨ Shubh Deepavali! ✨\n— Sent with warmth from SHUBH DEEP`;
 
     try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(textToCopy);
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(formattedWish);
       } else {
         const textarea = document.createElement('textarea');
-        textarea.value = textToCopy;
+        textarea.value = formattedWish;
         textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
+        textarea.style.left = '-9999px';
+        textarea.style.top = '-9999px';
         document.body.appendChild(textarea);
         textarea.focus();
         textarea.select();
@@ -143,136 +176,57 @@ export const WishesExperience: React.FC = () => {
         <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
           <div className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-secondary font-medium font-sans mb-2">
             <SmallPetalIcon />
-            <span>Mithas & Shayari</span>
+            <span>{getContent('wishes_badge', 'Festive Verses & Heartfelt Wishes')}</span>
             <SmallPetalIcon />
           </div>
           <h2 className="font-serif-indian text-3xl sm:text-4xl text-text font-bold">
-            शुभकामनाएं एवं शायरी
+            {getContent('wishes_heading', 'शब्दों में दीपावली की मिठास')}
           </h2>
-          <p className="font-sans text-xs sm:text-sm text-text/75 mt-1">
-            Pick a mood below to discover playful banter, soulful blessings, or gentle festive compliments.
+          <p className="font-sans text-xs sm:text-sm text-text/75 mt-1 leading-relaxed">
+            {getContent(
+              'wishes_subtitle',
+              'Spreading warmth, lighthearted laughter, and heartfelt blessings to celebrate this festival of lights.'
+            )}
           </p>
           <RangoliDivider className="mt-4" />
         </div>
 
-        {/* 1. Three Category Selection Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          {/* Category A: Funny Shayari */}
-          <button
-            type="button"
-            onClick={() => handleCategoryChange('funny')}
-            className={`group p-4 sm:p-5 rounded-xl border text-left transition-all duration-300 relative focus:outline-none focus:ring-2 focus:ring-primary/40 ${
-              activeCategory === 'funny'
-                ? 'bg-surface border-primary shadow-earthy -translate-y-0.5'
-                : 'bg-surface/60 border-secondary/20 hover:border-primary/40 hover:bg-surface/85'
-            }`}
-            aria-selected={activeCategory === 'funny'}
-            role="tab"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-2xl">🍬</span>
-              <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
-                  activeCategory === 'funny'
-                    ? 'bg-primary text-surface'
-                    : 'bg-[#F3EBDD] text-secondary'
+        {/* Dynamic Category Selection Cards */}
+        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-8">
+          {categories.map((cat) => {
+            const count = (categorizedWishes[cat.id] || []).length;
+            const isSelected = activeCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => handleCategoryChange(cat.id)}
+                className={`group px-4 sm:px-5 py-3 rounded-xl border text-left transition-all duration-300 relative focus:outline-none focus:ring-2 focus:ring-primary/40 flex items-center gap-3 ${
+                  isSelected
+                    ? 'bg-surface border-primary shadow-earthy -translate-y-0.5'
+                    : 'bg-surface/60 border-secondary/20 hover:border-primary/40 hover:bg-surface/85'
                 }`}
+                aria-selected={isSelected}
+                role="tab"
               >
-                <Smile className="w-3.5 h-3.5" />
-              </div>
-            </div>
-            <h3 className="font-serif-indian text-base sm:text-lg font-bold text-text">
-              Funny Shayari
-            </h3>
-            <span className="text-[11px] font-serif-indian text-primary font-medium block">
-              हँसी-मज़ाक शायरी
-            </span>
-            <p className="text-[11px] font-sans text-text/65 mt-1 leading-relaxed">
-              Playful Diwali humor, calories & Kaju Katli stories.
-            </p>
-            {activeCategory === 'funny' && (
-              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-primary rounded-t-full" />
-            )}
-          </button>
-
-          {/* Category B: Heartwarming Wishes */}
-          <button
-            type="button"
-            onClick={() => handleCategoryChange('heartwarming')}
-            className={`group p-4 sm:p-5 rounded-xl border text-left transition-all duration-300 relative focus:outline-none focus:ring-2 focus:ring-primary/40 ${
-              activeCategory === 'heartwarming'
-                ? 'bg-surface border-primary shadow-earthy -translate-y-0.5'
-                : 'bg-surface/60 border-secondary/20 hover:border-primary/40 hover:bg-surface/85'
-            }`}
-            aria-selected={activeCategory === 'heartwarming'}
-            role="tab"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-2xl">🪔</span>
-              <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
-                  activeCategory === 'heartwarming'
-                    ? 'bg-primary text-surface'
-                    : 'bg-[#F3EBDD] text-secondary'
-                }`}
-              >
-                <Heart className="w-3.5 h-3.5" />
-              </div>
-            </div>
-            <h3 className="font-serif-indian text-base sm:text-lg font-bold text-text">
-              Heartwarming
-            </h3>
-            <span className="text-[11px] font-serif-indian text-primary font-medium block">
-              दिल से शुभकामनाएं
-            </span>
-            <p className="text-[11px] font-sans text-text/65 mt-1 leading-relaxed">
-              Quiet peace, gratitude, blessings & true friendship.
-            </p>
-            {activeCategory === 'heartwarming' && (
-              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-primary rounded-t-full" />
-            )}
-          </button>
-
-          {/* Category C: A Little Flirt */}
-          <button
-            type="button"
-            onClick={() => handleCategoryChange('flirt')}
-            className={`group p-4 sm:p-5 rounded-xl border text-left transition-all duration-300 relative focus:outline-none focus:ring-2 focus:ring-primary/40 ${
-              activeCategory === 'flirt'
-                ? 'bg-surface border-primary shadow-earthy -translate-y-0.5'
-                : 'bg-surface/60 border-secondary/20 hover:border-primary/40 hover:bg-surface/85'
-            }`}
-            aria-selected={activeCategory === 'flirt'}
-            role="tab"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-2xl">✨</span>
-              <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
-                  activeCategory === 'flirt'
-                    ? 'bg-primary text-surface'
-                    : 'bg-[#F3EBDD] text-secondary'
-                }`}
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-              </div>
-            </div>
-            <h3 className="font-serif-indian text-base sm:text-lg font-bold text-text">
-              A Little Flirt
-            </h3>
-            <span className="text-[11px] font-serif-indian text-primary font-medium block">
-              हल्की-सी शरारत
-            </span>
-            <p className="text-[11px] font-sans text-text/65 mt-1 leading-relaxed">
-              Cute hints, lovely smiles & tasteful playful teasing.
-            </p>
-            {activeCategory === 'flirt' && (
-              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-primary rounded-t-full" />
-            )}
-          </button>
+                <span className="text-2xl select-none">{cat.emoji}</span>
+                <div>
+                  <h3 className="font-serif-indian text-sm sm:text-base font-bold text-text leading-tight">
+                    {cat.name}
+                  </h3>
+                  <span className="text-[10px] font-sans text-secondary font-medium block">
+                    {count} {count === 1 ? 'verse' : 'verses'}
+                  </span>
+                </div>
+                {isSelected && (
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-0.5 bg-primary rounded-t-full" />
+                )}
+              </button>
+            );
+          })}
         </div>
 
-        {/* 2. Interactive Wish Display Card (Artisanal Khadi Postcard) */}
+        {/* Interactive Wish Display Card (Artisanal Khadi Postcard) */}
         <div
           key={animKey}
           className="relative rounded-2xl bg-surface border border-secondary/25 shadow-earthy p-6 sm:p-10 paper-texture wish-card-enter transition-all"
@@ -288,7 +242,7 @@ export const WishesExperience: React.FC = () => {
 
             {/* Counter indicator */}
             <span className="text-[11px] font-sans text-secondary/60 tracking-widest uppercase">
-              {currentIndex + 1} of {categorizedWishes[activeCategory].length}
+              {currentIndex + 1} of {activeList.length || 1}
             </span>
           </div>
 
@@ -317,13 +271,24 @@ export const WishesExperience: React.FC = () => {
 
             {/* Subtle English Translation / Poetic Subtitle */}
             {currentWish.english && (
-              <p className="font-sans text-xs sm:text-sm text-text/70 italic mt-6 pt-4 border-t border-secondary/15 wish-line-4">
+              <p className="font-sans text-xs sm:text-sm text-text/70 italic mt-6 pt-4 border-t border-secondary/15 wish-line-4 leading-relaxed">
                 "{currentWish.english}"
               </p>
             )}
+
+            {/* Attached Media Image (if uploaded via CMS) */}
+            {currentWish.imageUrl && (
+              <div className="mt-5 rounded-xl overflow-hidden border border-secondary/25 max-h-56 mx-auto">
+                <img
+                  src={currentWish.imageUrl}
+                  alt={currentWish.tag}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
           </div>
 
-          {/* 3. Action Controls: Next Wish, Copy to Clipboard, Replay */}
+          {/* Action Controls: Next Wish, Copy to Clipboard, Replay */}
           <div className="mt-8 pt-6 border-t border-secondary/15 flex flex-wrap items-center justify-between gap-3">
             {/* Left Actions: Copy & Replay */}
             <div className="flex items-center gap-2">
@@ -342,7 +307,7 @@ export const WishesExperience: React.FC = () => {
                 ) : (
                   <>
                     <Copy className="w-3.5 h-3.5 text-secondary" />
-                    <span>Copy Wish</span>
+                    <span>{getContent('wishes_copy_btn', 'Copy Wish')}</span>
                   </>
                 )}
               </button>
@@ -367,7 +332,7 @@ export const WishesExperience: React.FC = () => {
               aria-label="Generate next Diwali wish"
             >
               <span className="font-serif-indian text-xs sm:text-sm">
-                अगली शुभकामना
+                {getContent('wishes_next_btn', 'अगली शुभकामना')}
               </span>
               <ArrowRight className="w-4 h-4 text-accent group-hover:translate-x-1 transition-transform" />
             </button>

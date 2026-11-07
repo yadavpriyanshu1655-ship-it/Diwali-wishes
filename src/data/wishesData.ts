@@ -1,4 +1,4 @@
-export type WishCategory = 'funny' | 'heartwarming' | 'flirt';
+export type WishCategory = 'funny' | 'heartwarming' | 'flirt' | 'friendship' | 'diwali_special' | 'custom' | string;
 
 export interface WishItem {
   id: string;
@@ -7,6 +7,7 @@ export interface WishItem {
   english?: string;
   tag: string;
   emoji: string;
+  imageUrl?: string;
 }
 
 export const WISHES_DATA: WishItem[] = [

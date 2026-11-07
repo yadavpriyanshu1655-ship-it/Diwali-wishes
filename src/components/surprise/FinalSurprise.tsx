@@ -3,10 +3,12 @@ import { Sparkles, RotateCcw } from 'lucide-react';
 import { soundEngine } from '../../services/soundEngine';
 import { RangoliDivider, SmallPetalIcon } from '../illustrations/RangoliMotif';
 import { ClayDiyaIllustration } from '../illustrations/ClayDiyaIllustration';
+import { useSiteContent } from '../../context/ContentContext';
 
 type GiftState = 'closed' | 'opening' | 'revealed';
 
 export const FinalSurprise: React.FC = () => {
+  const { getContent } = useSiteContent();
   const [giftState, setGiftState] = useState<GiftState>('closed');
   const [animKey, setAnimKey] = useState<number>(0);
 
@@ -56,14 +58,14 @@ export const FinalSurprise: React.FC = () => {
         <div className="max-w-2xl mx-auto mb-10 sm:mb-12">
           <div className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-secondary font-medium font-sans mb-2">
             <SmallPetalIcon />
-            <span>The Final Blessing</span>
+            <span>{getContent('gift_badge', 'The Final Blessing')}</span>
             <SmallPetalIcon />
           </div>
           <h2 className="font-serif-indian text-3xl sm:text-5xl text-primary font-bold tracking-tight">
-            A Little Surprise For You...
+            {getContent('gift_heading', 'A Little Surprise For You...')}
           </h2>
           <p className="font-sans text-xs sm:text-base text-text/80 mt-2 max-w-lg mx-auto leading-relaxed">
-            Because every beautiful celebration deserves a little extra happiness.
+            {getContent('gift_subtitle', 'Because every beautiful celebration deserves a little extra happiness.')}
           </p>
           <RangoliDivider className="mt-5" />
         </div>
@@ -287,7 +289,9 @@ export const FinalSurprise: React.FC = () => {
                     aria-label="Open Your Gift"
                   >
                     <Sparkles className="w-4 h-4 text-accent group-hover:rotate-12 transition-transform" />
-                    <span className="font-medium tracking-wide">Open Your Gift</span>
+                    <span className="font-medium tracking-wide">
+                      {getContent('gift_open_btn', 'Open Your Gift')}
+                    </span>
                   </button>
 
                   <span className="text-[11px] font-sans text-secondary/75 tracking-wider uppercase mt-2.5">
@@ -300,10 +304,10 @@ export const FinalSurprise: React.FC = () => {
               {isOpening && (
                 <div className="mt-4 flex flex-col items-center animate-pulse">
                   <span className="font-serif-indian text-primary text-base">
-                    ॥ उपहार खुल रहा है... ॥
+                    {getContent('gift_unveiling_hindi', '॥ उपहार खुल रहा है... ॥')}
                   </span>
                   <span className="text-xs font-sans text-secondary tracking-widest uppercase">
-                    Unveiling your celebration...
+                    {getContent('gift_unveiling_en', 'Unveiling your celebration...')}
                   </span>
                 </div>
               )}
@@ -331,33 +335,33 @@ export const FinalSurprise: React.FC = () => {
                   {/* Stanza 1 */}
                   <div className="space-y-1">
                     <p className="font-serif-indian text-lg sm:text-2xl text-text font-normal leading-relaxed special-line-1">
-                      जिंदगी में रोशनी हमेशा बनी रहे,
+                      {getContent('poem_line_1', 'जिंदगी में रोशनी हमेशा बनी रहे,')}
                     </p>
                     <p className="font-serif-indian text-lg sm:text-2xl text-text font-normal leading-relaxed special-line-2">
-                      चेहरे पर मुस्कान कभी कम न हो।
+                      {getContent('poem_line_2', 'चेहरे पर मुस्कान कभी कम न हो।')}
                     </p>
                   </div>
 
                   {/* Stanza 2 */}
                   <div className="space-y-1 pt-2">
                     <p className="font-serif-indian text-lg sm:text-2xl text-text font-normal leading-relaxed special-line-3">
-                      हर ख्वाब पूरा हो तुम्हारा,
+                      {getContent('poem_line_3', 'हर ख्वाब पूरा हो तुम्हारा,')}
                     </p>
                     <p className="font-serif-indian text-lg sm:text-2xl text-text font-normal leading-relaxed special-line-4">
-                      और खुशियों का कोई अंत न हो।
+                      {getContent('poem_line_4', 'और खुशियों का कोई अंत न हो।')}
                     </p>
                   </div>
 
                   {/* Stanza 3 (Playful & Subtly Flirty) */}
                   <div className="pt-3 border-t border-secondary/15 space-y-1.5">
                     <p className="font-serif-indian text-sm sm:text-base text-secondary font-medium italic special-line-5">
-                      वैसे एक छोटी सी बात...
+                      {getContent('poem_line_5', 'वैसे एक छोटी सी बात...')}
                     </p>
                     <p className="font-sans text-sm sm:text-base text-primary/90 font-medium leading-relaxed special-line-6">
-                      Diwali ke diye toh har koi jalata hai,
+                      {getContent('poem_line_6', 'Diwali ke diye toh har koi jalata hai,')}
                     </p>
                     <p className="font-sans text-sm sm:text-base text-primary font-semibold leading-relaxed special-line-7">
-                      par kuch log apni smile se hi celebration complete kar dete hain! 😉
+                      {getContent('poem_line_7', 'par kuch log apni smile se hi celebration complete kar dete hain! 😉')}
                     </p>
                   </div>
                 </div>
@@ -365,10 +369,10 @@ export const FinalSurprise: React.FC = () => {
                 {/* Final Greeting */}
                 <div className="mt-8 pt-6 border-t border-secondary/20 special-final-greeting">
                   <h3 className="font-serif-indian text-2xl sm:text-3xl font-bold text-primary">
-                    Happy Diwali to You and Your Family!
+                    {getContent('poem_final_title', 'Happy Diwali to You and Your Family!')}
                   </h3>
                   <span className="text-xs uppercase tracking-[0.25em] font-sans font-semibold text-secondary mt-1 block">
-                    May Peace & Joy Abound
+                    {getContent('poem_final_subtitle', 'May Peace & Joy Abound')}
                   </span>
                 </div>
               </div>
@@ -380,10 +384,10 @@ export const FinalSurprise: React.FC = () => {
                 
                 {/* Main Heading */}
                 <h3 className="font-serif-indian text-4xl sm:text-5xl font-bold text-primary tracking-tight mb-1">
-                  शुभ दीपावली
+                  {getContent('final_screen_heading', 'शुभ दीपावली')}
                 </h3>
                 <p className="font-serif-indian text-xl sm:text-2xl text-text font-normal mb-4">
-                  Happy Diwali!
+                  {getContent('final_screen_sub', 'Happy Diwali!')}
                 </p>
 
                 {/* Lit Clay Diya Centerpiece */}
@@ -396,7 +400,7 @@ export const FinalSurprise: React.FC = () => {
 
                 {/* Closing Heartfelt Line */}
                 <p className="font-serif-indian text-base sm:text-xl text-primary font-medium italic mt-6 mb-8 max-w-md mx-auto leading-relaxed">
-                  "Keep smiling. Keep shining. Keep spreading happiness."
+                  {getContent('final_screen_quote', '"Keep smiling. Keep shining. Keep spreading happiness."')}
                 </p>
 
                 {/* Replay Magic Feature Button */}
@@ -407,7 +411,9 @@ export const FinalSurprise: React.FC = () => {
                   aria-label="Replay Magic — Open festive gift again"
                 >
                   <RotateCcw className="w-4 h-4 text-secondary group-hover:text-primary group-hover:-rotate-45 transition-transform" />
-                  <span className="font-medium">Replay Magic ✨</span>
+                  <span className="font-medium">
+                    {getContent('final_replay_btn', 'Replay Magic ✨')}
+                  </span>
                 </button>
               </div>
 

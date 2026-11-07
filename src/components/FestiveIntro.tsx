@@ -2,8 +2,10 @@ import React from 'react';
 import { RangoliDivider, SmallPetalIcon } from './illustrations/RangoliMotif';
 import { RangoliReveal } from './rangoli/RangoliReveal';
 import { Sun, Heart, Sparkle } from 'lucide-react';
+import { useSiteContent } from '../context/ContentContext';
 
 export const FestiveIntro: React.FC = () => {
+  const { getContent } = useSiteContent();
   const traditions = [
     {
       num: '०१',
@@ -36,14 +38,14 @@ export const FestiveIntro: React.FC = () => {
         <div className="text-center max-w-2xl mx-auto mb-14">
           <div className="flex items-center justify-center gap-2 text-xs uppercase tracking-widest text-secondary font-medium font-sans mb-2">
             <SmallPetalIcon />
-            <span>The Spirit of Deepavali</span>
+            <span>{getContent('intro_badge', 'The Spirit of Deepavali')}</span>
             <SmallPetalIcon />
           </div>
           <h2 className="font-serif-indian text-2xl sm:text-4xl text-text font-bold leading-snug">
-            दीपक की ज्योति से आलोकित हो संसार
+            {getContent('intro_heading', 'दीपक की ज्योति से आलोकित हो संसार')}
           </h2>
           <p className="font-serif-indian text-base sm:text-lg text-primary italic mt-1">
-            "May the flame of every earthen lamp illuminate the world with peace."
+            {getContent('intro_quote', '"May the flame of every earthen lamp illuminate the world with peace."')}
           </p>
           <RangoliDivider className="mt-4" />
         </div>
@@ -56,11 +58,10 @@ export const FestiveIntro: React.FC = () => {
               “
             </div>
             <p className="font-sans text-sm sm:text-base md:text-lg text-text/85 leading-relaxed relative z-10 text-justify sm:text-center">
-              Diwali is a return to simplicity. It is the fragrance of raw river clay baking in the potter's kiln, 
-              the deliberate geometry of rice-flour rangoli adorning courtyard steps, and the warmth of reuniting with loved ones. 
-              When an earthen lamp is lit, it asks for neither fanfare nor extravagance—only a drop of oil to offer unconditional brightness. 
-              In that quiet gesture lies the true soul of <span className="font-semibold text-primary">SHUBH DEEP</span>: 
-              a mindful celebration of light, harmony, and renewed hope.
+              {getContent(
+                'intro_narrative',
+                "Diwali is a return to simplicity. It is the fragrance of raw river clay baking in the potter's kiln, the deliberate geometry of rice-flour rangoli adorning courtyard steps, and the warmth of reuniting with loved ones. When an earthen lamp is lit, it asks for neither fanfare nor extravagance—only a drop of oil to offer unconditional brightness. In that quiet gesture lies the true soul of SHUBH DEEP: a mindful celebration of light, harmony, and renewed hope."
+              )}
             </p>
             <div className="mt-6 flex justify-center items-center gap-2 text-xs font-serif-indian text-secondary">
               <span>॥ आनन्दो भवतु ॥</span>
