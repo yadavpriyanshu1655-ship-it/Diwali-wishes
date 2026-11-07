@@ -8,6 +8,7 @@ import { Footer } from './components/Footer';
 import { FloatingPetals } from './components/ambience/FloatingPetals';
 import { CelebrationFireworks } from './components/ambience/CelebrationFireworks';
 import { ContentProvider } from './context/ContentContext';
+import { soundEngine } from './services/soundEngine';
 
 const AdminApp = lazy(() =>
   import('./admin/AdminApp').then((mod) => ({ default: mod.AdminApp }))
@@ -29,6 +30,11 @@ const checkIsAdminRoute = (): boolean => {
 export const AppContent: React.FC = () => {
   const [isAdminView, setIsAdminView] = useState<boolean>(checkIsAdminRoute);
   const [fireworksActive, setFireworksActive] = useState<boolean>(false);
+
+  // Attempt instant background music autoplay on website entry
+  useEffect(() => {
+    soundEngine.attemptAutoplay();
+  }, []);
 
   // Sync route on browser navigation (history back/forward & hash changes)
   useEffect(() => {
