@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-background: #F3EBDD;
+  --color-primary: #B96543;
+  --color-secondary: #78805B;
+  --color-text: #49382E;
+  --color-accent: #D5A75B;
+  --color-surface: #FAF6EE;
+  --color-surface-elevated: #FFFDF9;
+  --color-border-subtle: rgba(120, 128, 91, 0.25);
+}
+
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, .font-serif-indian {
+    font-family: 'Rozha One', 'Noto Serif Devanagari', Georgia, serif;
+    font-feature-settings: "kern" 1;
+    text-rendering: optimizeLegibility;
+  }
+}
+
+/* Subtle handcrafted paper texture overlay */
+.paper-texture {
+  background-image: radial-gradient(rgba(73, 56, 46, 0.04) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* Elegant thin decorative line with floral center */
+.border-subtle-pattern {
+  border-color: var(--color-border-subtle);
+}
+
+/* Custom smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
