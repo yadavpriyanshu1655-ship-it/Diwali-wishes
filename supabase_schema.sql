@@ -55,8 +55,30 @@ CREATE TABLE IF NOT EXISTS public.admin_settings (
 );
 
 -- ==============================================================================
--- 6. ROW LEVEL SECURITY (RLS) POLICIES
+-- 6. ROW LEVEL SECURITY (RLS) POLICIES & DATABASE-LEVEL AUTHORIZATION
 -- ==============================================================================
+
+-- Helper Function: Verify if current authenticated user's email matches authorized admin
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS boolean AS $$
+DECLARE
+  v_authorized_email text;
+BEGIN
+  IF auth.role() <> 'authenticated' THEN
+    RETURN false;
+  END IF;
+
+  SELECT authorized_email INTO v_authorized_email
+  FROM public.admin_settings
+  WHERE id = 'config';
+
+  IF v_authorized_email IS NOT NULL AND v_authorized_email <> '' THEN
+    RETURN LOWER(v_authorized_email) = LOWER(auth.jwt() ->> 'email');
+  END IF;
+
+  RETURN true;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Enable RLS on all tables
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
@@ -74,21 +96,21 @@ DROP POLICY IF EXISTS "Admin can manage categories" ON public.categories;
 CREATE POLICY "Admin can manage categories" 
     ON public.categories FOR ALL 
     TO authenticated 
-    USING (true) 
-    WITH CHECK (true);
+    USING (public.is_admin()) 
+    WITH CHECK (public.is_admin());
 
 -- SHAYARIS & WISHES POLICIES
 DROP POLICY IF EXISTS "Public can view published shayaris and wishes" ON public.shayaris_wishes;
 CREATE POLICY "Public can view published shayaris and wishes" 
     ON public.shayaris_wishes FOR SELECT 
-    USING (status = 'published' OR auth.role() = 'authenticated');
+    USING (status = 'published' OR public.is_admin());
 
 DROP POLICY IF EXISTS "Admin can manage all shayaris and wishes" ON public.shayaris_wishes;
 CREATE POLICY "Admin can manage all shayaris and wishes" 
     ON public.shayaris_wishes FOR ALL 
     TO authenticated 
-    USING (true) 
-    WITH CHECK (true);
+    USING (public.is_admin()) 
+    WITH CHECK (public.is_admin());
 
 -- SITE CONTENT POLICIES
 DROP POLICY IF EXISTS "Public can view site content" ON public.site_content;
@@ -100,22 +122,22 @@ DROP POLICY IF EXISTS "Admin can manage site content" ON public.site_content;
 CREATE POLICY "Admin can manage site content" 
     ON public.site_content FOR ALL 
     TO authenticated 
-    USING (true) 
-    WITH CHECK (true);
+    USING (public.is_admin()) 
+    WITH CHECK (public.is_admin());
 
 -- ADMIN SETTINGS POLICIES
 DROP POLICY IF EXISTS "Admin can view settings" ON public.admin_settings;
 CREATE POLICY "Admin can view settings" 
     ON public.admin_settings FOR SELECT 
     TO authenticated 
-    USING (true);
+    USING (public.is_admin());
 
 DROP POLICY IF EXISTS "Admin can update settings" ON public.admin_settings;
 CREATE POLICY "Admin can update settings" 
     ON public.admin_settings FOR ALL 
     TO authenticated 
-    USING (true) 
-    WITH CHECK (true);
+    USING (public.is_admin()) 
+    WITH CHECK (public.is_admin());
 
 -- ==============================================================================
 -- 7. SUPABASE STORAGE BUCKET FOR MEDIA
@@ -136,19 +158,19 @@ DROP POLICY IF EXISTS "Admin Upload to Media" ON storage.objects;
 CREATE POLICY "Admin Upload to Media"
     ON storage.objects FOR INSERT
     TO authenticated
-    WITH CHECK (bucket_id = 'media');
+    WITH CHECK (bucket_id = 'media' AND public.is_admin());
 
 DROP POLICY IF EXISTS "Admin Update Media" ON storage.objects;
 CREATE POLICY "Admin Update Media"
     ON storage.objects FOR UPDATE
     TO authenticated
-    USING (bucket_id = 'media');
+    USING (bucket_id = 'media' AND public.is_admin());
 
 DROP POLICY IF EXISTS "Admin Delete Media" ON storage.objects;
 CREATE POLICY "Admin Delete Media"
     ON storage.objects FOR DELETE
     TO authenticated
-    USING (bucket_id = 'media');
+    USING (bucket_id = 'media' AND public.is_admin());
 
 -- ==============================================================================
 -- 8. PRE-SEED INITIAL DATA (APPROVED SHUBH DEEP CONTENT)

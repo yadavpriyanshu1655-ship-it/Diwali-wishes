@@ -101,6 +101,7 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onNavigateToPublic }) => {
           if (isAuthorized) {
             setCurrentUserEmail(user.email);
           } else {
+            await signOutAdmin();
             setCurrentUserEmail(null);
           }
         }
@@ -125,6 +126,9 @@ export const AdminApp: React.FC<AdminAppProps> = ({ onNavigateToPublic }) => {
           const isAuth = await isUserAuthorizedAdmin(session.user.email);
           if (isAuth && isMounted) {
             setCurrentUserEmail(session.user.email);
+          } else if (isMounted) {
+            await signOutAdmin();
+            setCurrentUserEmail(null);
           }
         } else if (isMounted) {
           setCurrentUserEmail(null);

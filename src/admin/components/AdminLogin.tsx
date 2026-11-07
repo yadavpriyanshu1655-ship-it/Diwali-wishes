@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import {
   signInAdmin,
+  signOutAdmin,
   isUserAuthorizedAdmin,
   isSupabaseConfigured,
   getActiveSupabaseConfig,
@@ -86,7 +87,8 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
       // Check authorization
       const isAuthorized = await isUserAuthorizedAdmin(user.email);
       if (!isAuthorized) {
-        setErrorMsg('Access denied: This email is not authorized for SHUBH DEEP admin access.');
+        await signOutAdmin();
+        setErrorMsg(`Access denied: The email "${user.email}" is not authorized for SHUBH DEEP admin access.`);
         setLoading(false);
         return;
       }

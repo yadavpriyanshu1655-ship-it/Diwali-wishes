@@ -180,33 +180,34 @@ export async function signOutAdmin(): Promise<{ error?: string }> {
 // Verify if logged-in user is authorized admin
 export async function isUserAuthorizedAdmin(userEmail?: string): Promise<boolean> {
   if (!userEmail) return false;
+  const normalizedUserEmail = userEmail.trim().toLowerCase();
   const { adminEmail } = getActiveSupabaseConfig();
 
-  // 1. Check against active config if set
-  if (adminEmail && adminEmail.toLowerCase() === userEmail.toLowerCase()) {
-    return true;
+  // 1. Check against active config (VITE_ADMIN_EMAIL or localStorage) if set
+  if (adminEmail && adminEmail.trim() !== '') {
+    return adminEmail.trim().toLowerCase() === normalizedUserEmail;
   }
 
   // 2. Check admin_settings table in Supabase
   const supabase = getSupabase();
   if (supabase) {
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('admin_settings')
         .select('authorized_email')
-        .single();
+        .eq('id', 'config')
+        .maybeSingle();
 
-      if (data && data.authorized_email) {
-        if (data.authorized_email.toLowerCase() === userEmail.toLowerCase()) {
-          return true;
-        }
+      if (!error && data && data.authorized_email && data.authorized_email.trim() !== '') {
+        const dbAdminEmail = data.authorized_email.trim().toLowerCase();
+        return dbAdminEmail === normalizedUserEmail;
       }
     } catch {
       // Fallback
     }
   }
 
-  // If no specific authorized email has been restricted in settings, allow authenticated user
+  // 3. If no specific authorized email has been restricted in settings, allow authenticated user
   return true;
 }
 
