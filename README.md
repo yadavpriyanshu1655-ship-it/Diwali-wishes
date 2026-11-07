@@ -97,3 +97,4 @@ Open the generated preview URL (typically `http://localhost:4173/`).
 - **Canvas:** HTML5 Canvas 2D (optimized 60 FPS physics loops)
 - **Icons:** [Lucide React](https://lucide.dev/)
 # Diwali-wishes
+# Diwali-wishes
