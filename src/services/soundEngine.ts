@@ -1,82 +1,228 @@
 /**
- * SHUBH DEEP — Audio Engine & Background Music Manager
- * Features:
- * 1. Immediate Autoplay on Entry: Attempts unmuted playback of `/audio/diwali-song.mp3` at 30% volume.
- * 2. Interaction-based Unlock: If modern browser policies block autoplay, hooks the very first user gesture
- *    (tap, click, keydown, pointerdown) to instantly start seamless playback.
- * 3. Singleton Audio Instance: Zero duplication, continuous looping across all page sections.
- * 4. Reactive State Subscription: Synchronizes navbar Sound Toggle with real-time audio playback status.
- * 5. Web Audio Sound Effects: Auspicious temple bell & diya match-strike layered smoothly over music.
- * 6. Graceful Synthetic Fallback: Seamless tanpura drone if external media is unavailable.
+ * SHUBH DEEP — Dedicated Background Music & Audio Engine
+ * Single Source: /audio/diwali-song.mp3
+ * Default Volume: 30% (0.3)
+ * Behavior:
+ * 1. Immediate Autoplay on website load.
+ * 2. If rejected by browser policy (e.g. Chrome/Safari zero-MEI), registers a reliable
+ *    first-interaction fallback (click, touchstart, touchend, pointerdown, keydown).
+ * 3. Does NOT pretend autoplay succeeded if blocked.
+ * 4. Continuous singleton playback across all website sections without restarting.
+ * 5. Reactive state subscription for the Navbar Sound On / Sound Off control.
+ * 6. Web Audio API auspicious sound effects (Temple Bell & Diya Light Strike) layered over music.
  */
 
 type SoundStateListener = (isPlaying: boolean) => void;
 
 class SoundEngine {
-  private ctx: AudioContext | null = null;
-  private masterGain: GainNode | null = null;
-
-  // Background Song Audio Element (Singleton)
-  private bgMusic: HTMLAudioElement | null = null;
+  private bgAudio: HTMLAudioElement | null = null;
   private isPlaying: boolean = false;
+  private isPlayPending: boolean = false;
   private userManuallyMuted: boolean = false;
   private listeners: Set<SoundStateListener> = new Set();
   private unlockAttached: boolean = false;
 
-  // Synthetic Tanpura Drone Fallback
-  private droneGain: GainNode | null = null;
-  private droneOscillators: OscillatorNode[] = [];
-  private lfo: OscillatorNode | null = null;
+  // Web Audio Context for Bell & Diya Chimes
+  private ctx: AudioContext | null = null;
+  private masterGain: GainNode | null = null;
 
   constructor() {
     if (typeof window !== 'undefined') {
-      this.initMusicElement();
+      this.initAudioElement();
     }
   }
 
   /**
-   * Initializes the singleton HTML5 Audio element for /audio/diwali-song.mp3
+   * Initializes the single background music instance.
    */
-  private initMusicElement() {
-    if (this.bgMusic) return;
+  private initAudioElement(): HTMLAudioElement | null {
+    if (this.bgAudio) return this.bgAudio;
+    if (typeof window === 'undefined') return null;
 
     try {
-      const basePath = import.meta.env.BASE_URL || '/';
-      const cleanBase = basePath.endsWith('/') ? basePath : `${basePath}/`;
-      const audioUrl = `${cleanBase}audio/diwali-song.mp3`;
+      // Standard public URL: /audio/diwali-song.mp3
+      const audioUrl = new URL('/audio/diwali-song.mp3', window.location.origin).href;
 
-      this.bgMusic = new Audio(audioUrl);
-      this.bgMusic.loop = true;
-      this.bgMusic.volume = 0.3; // 30% default volume
-      this.bgMusic.preload = 'auto';
+      this.bgAudio = new Audio(audioUrl);
+      this.bgAudio.loop = true;
+      this.bgAudio.volume = 0.3; // Strictly 30%
+      this.bgAudio.preload = 'auto';
 
-      // Keep state synchronized
-      this.bgMusic.addEventListener('play', () => {
+      this.bgAudio.addEventListener('play', () => {
         this.isPlaying = true;
         this.notifyListeners();
       });
 
-      this.bgMusic.addEventListener('pause', () => {
+      this.bgAudio.addEventListener('pause', () => {
         this.isPlaying = false;
         this.notifyListeners();
       });
 
-      this.bgMusic.addEventListener('ended', () => {
+      this.bgAudio.addEventListener('ended', () => {
         this.isPlaying = false;
         this.notifyListeners();
       });
 
-      this.bgMusic.addEventListener('error', (e) => {
-        console.warn('[SoundEngine] Background audio element encountered an error:', e);
+      this.bgAudio.addEventListener('error', (e) => {
+        console.warn('[SoundEngine] Background audio loading/playback error:', e);
+        this.isPlaying = false;
+        this.notifyListeners();
       });
+
+      return this.bgAudio;
     } catch (err) {
-      console.warn('[SoundEngine] Audio element initialization skipped:', err);
+      console.warn('[SoundEngine] Could not initialize audio element:', err);
+      return null;
     }
   }
 
   /**
-   * Initialize Web Audio Context for Bell & Diya Chimes
+   * Safely play the audio element with volume 0.3 and race-condition prevention.
    */
+  public async safePlay(): Promise<boolean> {
+    const audio = this.initAudioElement();
+    if (!audio) return false;
+
+    // If already playing, return true
+    if (this.isPlaying && !audio.paused) {
+      return true;
+    }
+
+    if (this.isPlayPending) {
+      return false;
+    }
+
+    this.isPlayPending = true;
+
+    try {
+      audio.volume = 0.3; // Strictly 30% default volume
+      await audio.play();
+      this.isPlaying = true;
+      this.userManuallyMuted = false;
+      this.notifyListeners();
+      return true;
+    } catch (err: any) {
+      this.isPlaying = false;
+      this.notifyListeners();
+      // Returns false cleanly; does NOT pretend autoplay succeeded
+      return false;
+    } finally {
+      this.isPlayPending = false;
+    }
+  }
+
+  /**
+   * Attempt unmuted autoplay immediately on website entry.
+   * If rejected by browser policy (NotAllowedError), registers interaction fallback.
+   */
+  public async attemptAutoplay(): Promise<boolean> {
+    if (this.userManuallyMuted) return false;
+
+    const audio = this.initAudioElement();
+    if (!audio) return false;
+
+    const success = await this.safePlay();
+
+    if (success) {
+      console.log('[SoundEngine] Autoplay succeeded immediately on page load.');
+      return true;
+    } else {
+      console.log('[SoundEngine] Autoplay was blocked by browser policy. Registering first-interaction fallback.');
+      this.registerFirstInteractionFallback();
+      return false;
+    }
+  }
+
+  /**
+   * Register reliable first-interaction fallback listeners across pointer, touch, and keyboard.
+   */
+  private registerFirstInteractionFallback() {
+    if (this.unlockAttached || typeof window === 'undefined') return;
+    this.unlockAttached = true;
+
+    const events = ['click', 'pointerdown', 'touchstart', 'touchend', 'keydown'];
+
+    const handleInteraction = async () => {
+      if (this.userManuallyMuted) {
+        this.removeInteractionListeners(events, handleInteraction);
+        return;
+      }
+
+      const played = await this.safePlay();
+      if (played) {
+        console.log('[SoundEngine] Background music unlocked and playing after first user interaction.');
+        this.removeInteractionListeners(events, handleInteraction);
+      }
+    };
+
+    events.forEach((evt) => {
+      window.addEventListener(evt, handleInteraction, { capture: true, passive: true });
+      document.addEventListener(evt, handleInteraction, { capture: true, passive: true });
+    });
+  }
+
+  private removeInteractionListeners(events: string[], handler: () => void) {
+    if (typeof window === 'undefined') return;
+    events.forEach((evt) => {
+      window.removeEventListener(evt, handler, { capture: true });
+      document.removeEventListener(evt, handler, { capture: true });
+    });
+    this.unlockAttached = false;
+  }
+
+  /**
+   * Subscribe to playback status changes
+   */
+  public subscribe(listener: SoundStateListener): () => void {
+    this.listeners.add(listener);
+    listener(this.isPlaying);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
+
+  private notifyListeners() {
+    this.listeners.forEach((listener) => {
+      try {
+        listener(this.isPlaying);
+      } catch (err) {
+        console.error('[SoundEngine] Error in audio state listener:', err);
+      }
+    });
+  }
+
+  /**
+   * Toggle music playback (Sound On / Sound Off)
+   */
+  public toggle(): boolean {
+    const audio = this.initAudioElement();
+    if (!audio) return false;
+
+    if (this.isPlaying && !audio.paused) {
+      // User explicitly clicked Mute
+      this.userManuallyMuted = true;
+      audio.pause();
+      this.isPlaying = false;
+      this.notifyListeners();
+      return false;
+    } else {
+      // User explicitly clicked Unmute
+      this.userManuallyMuted = false;
+      this.playTempleBell();
+      this.safePlay();
+      return true;
+    }
+  }
+
+  public getIsPlaying(): boolean {
+    return this.isPlaying;
+  }
+
+  // ==========================================================================
+  // AUSPICIOUS SOUND EFFECTS (TEMPLE BELL & DIYA MATCH STRIKE)
+  // Layered on top of music without interrupting it
+  // ==========================================================================
+
   private initContext() {
     if (!this.ctx && typeof window !== 'undefined') {
       const AudioContextClass =
@@ -95,156 +241,6 @@ class SoundEngine {
     }
   }
 
-  /**
-   * Attempt immediate unmuted autoplay on page entry.
-   * If blocked by browser autoplay policy (NotAllowedError), prepares
-   * the earliest interaction unlock on pointerdown/touchstart/click/keydown.
-   */
-  public async attemptAutoplay(): Promise<boolean> {
-    this.initMusicElement();
-    if (!this.bgMusic || this.userManuallyMuted) return false;
-
-    // Ensure volume is strictly 30%
-    this.bgMusic.volume = 0.3;
-
-    try {
-      // Direct standard play attempt
-      const playPromise = this.bgMusic.play();
-
-      if (playPromise !== undefined) {
-        await playPromise;
-        this.isPlaying = true;
-        this.notifyListeners();
-        console.log('[SoundEngine] Autoplay with sound succeeded immediately.');
-        return true;
-      }
-      return false;
-    } catch (err: any) {
-      console.log(
-        `[SoundEngine] Autoplay blocked by browser policy (${err?.name || 'NotAllowedError'}). Attaching first-interaction listener.`
-      );
-      this.isPlaying = false;
-      this.notifyListeners();
-
-      // Setup earliest permitted interaction unlock
-      this.attachInteractionUnlock();
-      return false;
-    }
-  }
-
-  /**
-   * Sets up listeners on window for the earliest user interaction to unlock audio.
-   */
-  private attachInteractionUnlock() {
-    if (this.unlockAttached || typeof window === 'undefined') return;
-    this.unlockAttached = true;
-
-    const unlockHandler = async () => {
-      // Remove listeners immediately so it only executes once
-      ['pointerdown', 'touchstart', 'click', 'keydown'].forEach((eventName) => {
-        window.removeEventListener(eventName, unlockHandler, { capture: true });
-      });
-      this.unlockAttached = false;
-
-      // If user hasn't explicitly clicked Mute, start playback
-      if (!this.userManuallyMuted && this.bgMusic && this.bgMusic.paused) {
-        this.initContext();
-        try {
-          this.bgMusic.volume = 0.3;
-          await this.bgMusic.play();
-          this.isPlaying = true;
-          this.notifyListeners();
-          console.log('[SoundEngine] Audio unlocked and playing via user interaction.');
-        } catch (playErr) {
-          console.warn('[SoundEngine] Interaction unlock attempt failed:', playErr);
-        }
-      }
-    };
-
-    ['pointerdown', 'touchstart', 'click', 'keydown'].forEach((eventName) => {
-      window.addEventListener(eventName, unlockHandler, { capture: true, once: true });
-    });
-  }
-
-  /**
-   * Subscribe to playback status changes
-   */
-  public subscribe(listener: SoundStateListener): () => void {
-    this.listeners.add(listener);
-    // Initial call
-    listener(this.isPlaying);
-    return () => {
-      this.listeners.delete(listener);
-    };
-  }
-
-  private notifyListeners() {
-    this.listeners.forEach((listener) => {
-      try {
-        listener(this.isPlaying);
-      } catch (err) {
-        console.error('[SoundEngine] Listener notification error:', err);
-      }
-    });
-  }
-
-  /**
-   * Toggle music playback (Sound On / Sound Off)
-   */
-  public toggle(): boolean {
-    this.initMusicElement();
-
-    if (this.isPlaying) {
-      // Mute / Pause
-      this.userManuallyMuted = true;
-      if (this.bgMusic) {
-        this.bgMusic.pause();
-      }
-      this.stopSyntheticDrone();
-      this.isPlaying = false;
-      this.notifyListeners();
-      return false;
-    } else {
-      // Unmute / Play
-      this.userManuallyMuted = false;
-      this.initContext();
-      this.playTempleBell();
-
-      if (this.bgMusic) {
-        this.bgMusic.volume = 0.3;
-        this.bgMusic
-          .play()
-          .then(() => {
-            this.isPlaying = true;
-            this.notifyListeners();
-          })
-          .catch((err) => {
-            console.warn('[SoundEngine] Play failed, activating synthetic fallback drone:', err);
-            this.startSyntheticDrone();
-            this.isPlaying = true;
-            this.notifyListeners();
-          });
-      } else {
-        this.startSyntheticDrone();
-        this.isPlaying = true;
-        this.notifyListeners();
-      }
-      return true;
-    }
-  }
-
-  public getIsPlaying(): boolean {
-    return this.isPlaying;
-  }
-
-  // ==========================================================================
-  // SACRED SOUND EFFECTS (TEMPLE BELL & DIYA MATCH STRIKE)
-  // Layered on top of music without interrupting it
-  // ==========================================================================
-
-  /**
-   * Auspicious Traditional Temple Bell (Ghantha)
-   */
   public playTempleBell() {
     try {
       this.initContext();
@@ -284,10 +280,6 @@ class SoundEngine {
     }
   }
 
-  /**
-   * Sound effect for lighting the sacred Diya:
-   * Gentle acoustic match-strike followed by warm golden chime
-   */
   public playDiyaLightStrike() {
     try {
       this.initContext();
@@ -295,7 +287,7 @@ class SoundEngine {
 
       const now = this.ctx.currentTime;
 
-      // Soft match-strike friction (bandpass filtered noise burst)
+      // Soft match friction
       const bufferSize = Math.floor(this.ctx.sampleRate * 0.08);
       const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
       const output = noiseBuffer.getChannelData(0);
@@ -321,7 +313,7 @@ class SoundEngine {
 
       whiteNoise.start(now);
 
-      // Followed by warm singing chime (D5, A5, D6 harmonic chord)
+      // Warm singing chime
       const chimeFreqs = [587.33, 880, 1174.66];
       chimeFreqs.forEach((freq, i) => {
         if (!this.ctx || !this.masterGain) return;
@@ -342,89 +334,6 @@ class SoundEngine {
       });
     } catch {
       // Graceful fallback
-    }
-  }
-
-  // ==========================================================================
-  // SYNTHETIC TANPURA DRONE (FALLBACK IF AUDIO FILE FAILS)
-  // ==========================================================================
-  private startSyntheticDrone() {
-    try {
-      this.initContext();
-      if (!this.ctx || !this.masterGain) return;
-      if (this.droneOscillators.length > 0) return;
-
-      const now = this.ctx.currentTime;
-      this.droneGain = this.ctx.createGain();
-      this.droneGain.gain.setValueAtTime(0.001, now);
-      this.droneGain.gain.linearRampToValueAtTime(0.1, now + 2.0);
-
-      const filter = this.ctx.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(950, now);
-      filter.Q.setValueAtTime(2.5, now);
-
-      this.droneGain.connect(filter);
-      filter.connect(this.masterGain);
-
-      const droneNotes = [
-        { freq: 73.41, type: 'triangle' as OscillatorType, detune: 0 },
-        { freq: 110.0, type: 'sine' as OscillatorType, detune: -3 },
-        { freq: 146.83, type: 'triangle' as OscillatorType, detune: 4 },
-        { freq: 220.0, type: 'sine' as OscillatorType, detune: -2 },
-        { freq: 293.66, type: 'sine' as OscillatorType, detune: 2 },
-      ];
-
-      this.droneOscillators = droneNotes.map(({ freq, type, detune }) => {
-        const osc = this.ctx!.createOscillator();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, now);
-        osc.detune.setValueAtTime(detune, now);
-        osc.connect(this.droneGain!);
-        osc.start(now);
-        return osc;
-      });
-
-      this.lfo = this.ctx.createOscillator();
-      const lfoGain = this.ctx.createGain();
-      this.lfo.frequency.setValueAtTime(0.25, now);
-      lfoGain.gain.setValueAtTime(0.03, now);
-      this.lfo.connect(lfoGain);
-      lfoGain.connect(this.droneGain.gain);
-      this.lfo.start(now);
-    } catch {
-      // Fallback
-    }
-  }
-
-  private stopSyntheticDrone() {
-    try {
-      if (!this.ctx || !this.droneGain) return;
-      const now = this.ctx.currentTime;
-      this.droneGain.gain.linearRampToValueAtTime(0.0001, now + 1.0);
-
-      const oscillatorsToStop = [...this.droneOscillators];
-      const lfoToStop = this.lfo;
-
-      setTimeout(() => {
-        oscillatorsToStop.forEach((osc) => {
-          try {
-            osc.stop();
-            osc.disconnect();
-          } catch {}
-        });
-        if (lfoToStop) {
-          try {
-            lfoToStop.stop();
-            lfoToStop.disconnect();
-          } catch {}
-        }
-      }, 1100);
-
-      this.droneOscillators = [];
-      this.lfo = null;
-    } catch {
-      // Fallback
     }
   }
 }
